@@ -18,6 +18,10 @@ else
     CERTBOT="certbot --staging"
 fi
 
+if [ ! -f /etc/letsencrypt/ssl-dhparams.pem ]; then
+    openssl dhparam -out /etc/letsencrypt/ssl-dhparams.pem 4096
+fi
+
 if /auto-https/bin/make-nginx-conf.py > /etc/nginx/sites-enabled/autohttps ; then
     echo "Nginx config generated"
 else
@@ -31,17 +35,13 @@ else
     echo "Cannot start nginx service"
     exit 1
 fi
-
-if /auto-https/bin/has-certs.py; then
-    echo "All domains has certificate"
+echo "Update certificates:"
+echo "    ${CERTBOT} certonly --webroot --webroot-path /var/www/letsencrypt -d ${AUTOHTTPS_DOMAINS} -m ${AUTOHTTPS_EMAIL} --agree-tos --no-eff-email --expand"
+if ${CERTBOT} certonly --webroot --webroot-path /var/www/letsencrypt -d ${AUTOHTTPS_DOMAINS} -m ${AUTOHTTPS_EMAIL} --agree-tos --no-eff-email --expand; then
+    echo "Update certificate successful"
 else
-    echo "Not all domain has certificate, apply for a new one"
-    if ${CERTBOT} certonly --webroot --webroot-path /var/www/letsencrypt -d ${AUTOHTTPS_DOMAINS} -m ${AUTOHTTPS_EMAIL} --agree-tos; then
-        echo "Apply certificate successful"
-    else
-        echo "Apply certificate failed"
-        exit 1
-    fi
+    echo "Update certificate failed"
+    exit 1
 fi
 
 bash

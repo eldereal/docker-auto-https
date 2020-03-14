@@ -16,6 +16,10 @@ for i in range(len(domains)):
     if (not domains[i]) or (not upstreams[i]):
         raise Exception("AUTOHTTPS_DOMAINS and AUTOHTTPS_UPSTREAMS cannot be empty")
 
+redirect = 'AUTOHTTPS_REDIRECT_HTTP' in os.environ and os.environ['AUTOHTTPS_REDIRECT_HTTP']
+
+certname = domains[0]
+
 confTemplate = '''
 server {{
     listen 80;
@@ -24,19 +28,26 @@ server {{
         root /var/www/letsencrypt;
     }}
     location / {{
-        proxy_pass http://{upstream};
-#       return 301 https://$host$request_uri;
+        {http_route};
     }}
 }}
-#server {{
-#    listen 443 ssl;
-#    server_name {hostname};
-#    ssl_certificate /etc/letsencrypt/live/{hostname}/fullchain.pem;
-#    ssl_certificate_key /etc/letsencrypt/live/{hostname}/privkey.pem;
-#    include /etc/nginx/ssl-common-params.conf;
-#    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
-#}}
+server {{
+    listen 443 ssl;
+    server_name {hostname};
+    ssl_certificate /etc/letsencrypt/live/{certname}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{certname}/privkey.pem;
+    include /auto-https/ssl-common-params.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    location / {{
+        proxy_pass http://{upstream};
+    }}
+}}
 '''
 
 for i in range(len(domains)):
-    print(confTemplate.format(key="host%d"%i, hostname=domains[i], upstream=upstreams[i]))
+    if redirect:
+        http_route = "return 301 https://$host$request_uri"
+    else:
+        http_route = "proxy_pass http://%s" % upstreams[i]
+    conf = confTemplate.format(key="host%d" % i, hostname=domains[i], certname=certname, upstream=upstreams[i], http_route=http_route)
+    print(conf)
