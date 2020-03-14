@@ -44,6 +44,7 @@ server {{
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
     location / {{
         proxy_pass http://{upstream};
+        include /auto-https/proxy-common-params.conf;
     }}
 }}
 '''
@@ -59,6 +60,6 @@ for i in range(len(domains)):
     if redirect:
         http_route = "return 301 https://$host$request_uri"
     else:
-        http_route = "proxy_pass http://%s" % upstreams[i]
+        http_route = "include /auto-https/proxy-common-params.conf;proxy_pass http://%s" % upstreams[i]
     conf = confTemplate.format(key="host%d" % i, hostname=domains[i], certname=certname, upstream=upstreams[i], http_route=http_route)
     print(conf)
