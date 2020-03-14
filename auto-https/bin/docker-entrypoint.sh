@@ -35,6 +35,7 @@ else
     echo "Cannot start nginx service"
     exit 1
 fi
+
 echo "Update certificates:"
 echo "    ${CERTBOT} certonly --webroot --webroot-path /var/www/letsencrypt -d ${AUTOHTTPS_DOMAINS} -m ${AUTOHTTPS_EMAIL} --agree-tos --no-eff-email --expand --noninteractive"
 if ${CERTBOT} certonly --webroot --webroot-path /var/www/letsencrypt -d ${AUTOHTTPS_DOMAINS} -m ${AUTOHTTPS_EMAIL} --agree-tos --no-eff-email --expand --noninteractive; then
@@ -44,7 +45,17 @@ else
     exit 1
 fi
 
-bash
+touch /var/log/letsencrypt/renewals.log
+echo "0 0,12 * * * root python3 -c 'import random; import time; time.sleep(random.random() * 3600)' && /usr/local/bin/certbot-auto renew >> /var/log/letsencrypt/renewals.log" > /etc/crontab
+
+if service cron start; then
+    echo "Cron service started"
+else
+    echo "Cannot start cron service"
+    exit 1
+fi
+
+tail -f /var/log/letsencrypt/renewals.log
 
 
 
