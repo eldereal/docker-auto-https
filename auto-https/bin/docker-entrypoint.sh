@@ -19,7 +19,7 @@ else
 fi
 
 if [ ! -f /etc/letsencrypt/ssl-dhparams.pem ]; then
-    openssl dhparam -out /etc/letsencrypt/ssl-dhparams.pem 4096
+    openssl dhparam -out /etc/letsencrypt/ssl-dhparams.pem 2048
 fi
 
 if /auto-https/bin/make-nginx-conf.py > /etc/nginx/sites-enabled/autohttps ; then
