@@ -17,20 +17,15 @@ for i in range(len(domains)):
         raise Exception("AUTOHTTPS_DOMAINS and AUTOHTTPS_UPSTREAMS cannot be empty")
 
 confTemplate = '''
-upstream {key} {{
-    server {upstream};
-}}
 server {{
     listen 80;
     server_name {hostname};
     location /.well-known/acme-challenge {{
         root /var/www/letsencrypt;
     }}
-    location * {{
-        if ($host = {hostname}) {{
-            return 404;
-#            return 301 https://$host$request_uri;
-        }}
+    location / {{
+        proxy_pass http://{upstream};
+#       return 301 https://$host$request_uri;
     }}
 }}
 #server {{
