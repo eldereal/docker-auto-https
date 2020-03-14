@@ -34,7 +34,7 @@ server {{
 }}
 '''
 
-httpsConfigTemplate = '''
+httpsConfTemplate = '''
 server {{
     listen 443 ssl;
     server_name {hostname};
