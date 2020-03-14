@@ -1,6 +1,5 @@
 FROM ubuntu:bionic
 
-
 RUN apt-get update && \
     apt-get -y install software-properties-common && \
     add-apt-repository -y ppa:certbot/certbot && \
