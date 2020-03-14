@@ -36,8 +36,8 @@ else
     exit 1
 fi
 echo "Update certificates:"
-echo "    ${CERTBOT} certonly --webroot --webroot-path /var/www/letsencrypt -d ${AUTOHTTPS_DOMAINS} -m ${AUTOHTTPS_EMAIL} --agree-tos --no-eff-email --expand"
-if ${CERTBOT} certonly --webroot --webroot-path /var/www/letsencrypt -d ${AUTOHTTPS_DOMAINS} -m ${AUTOHTTPS_EMAIL} --agree-tos --no-eff-email --expand; then
+echo "    ${CERTBOT} certonly --webroot --webroot-path /var/www/letsencrypt -d ${AUTOHTTPS_DOMAINS} -m ${AUTOHTTPS_EMAIL} --agree-tos --no-eff-email --expand --noninteractive"
+if ${CERTBOT} certonly --webroot --webroot-path /var/www/letsencrypt -d ${AUTOHTTPS_DOMAINS} -m ${AUTOHTTPS_EMAIL} --agree-tos --no-eff-email --expand --noninteractive; then
     echo "Update certificate successful"
 else
     echo "Update certificate failed"
