@@ -22,10 +22,10 @@ if [ ! -f /etc/letsencrypt/ssl-dhparams.pem ]; then
     openssl dhparam -out /etc/letsencrypt/ssl-dhparams.pem 2048
 fi
 
-if /auto-https/bin/make-nginx-conf.py > /etc/nginx/sites-enabled/autohttps ; then
-    echo "Nginx config generated"
+if /auto-https/bin/make-nginx-conf.py http > /etc/nginx/sites-enabled/autohttps-http ; then
+    echo "Nginx config for HTTP generated"
 else
-    echo "Cannot generate nginx config"
+    echo "Cannot generate nginx config for HTTP"
     exit 1
 fi
 
@@ -33,6 +33,7 @@ if service nginx start; then
     echo "Nginx service started"
 else
     echo "Cannot start nginx service"
+    cat /var/log/nginx/error.log
     exit 1
 fi
 
@@ -42,6 +43,21 @@ if ${CERTBOT} certonly --webroot --webroot-path /var/www/letsencrypt -d ${AUTOHT
     echo "Update certificate successful"
 else
     echo "Update certificate failed"
+    exit 1
+fi
+
+if /auto-https/bin/make-nginx-conf.py https > /etc/nginx/sites-enabled/autohttps-https ; then
+    echo "Nginx config for HTTPS generated"
+else
+    echo "Cannot generate nginx config for HTTPS"
+    exit 1
+fi
+
+if service nginx restart; then
+    echo "Nginx service reloaded"
+else
+    echo "Cannot reload nginx service"
+    cat /var/log/nginx/error.log
     exit 1
 fi
 

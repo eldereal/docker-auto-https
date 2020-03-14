@@ -20,7 +20,8 @@ redirect = 'AUTOHTTPS_REDIRECT_HTTP' in os.environ and os.environ['AUTOHTTPS_RED
 
 certname = domains[0]
 
-confTemplate = '''
+
+httpConfTemplate = '''
 server {{
     listen 80;
     server_name {hostname};
@@ -31,6 +32,9 @@ server {{
         {http_route};
     }}
 }}
+'''
+
+httpsConfigTemplate = '''
 server {{
     listen 443 ssl;
     server_name {hostname};
@@ -43,6 +47,13 @@ server {{
     }}
 }}
 '''
+
+if sys.argv[1] == 'http':
+    confTemplate = httpConfTemplate
+elif sys.argv[1] == 'https':
+    confTemplate = httpsConfTemplate
+else:
+    raise Exception("Argument 1 must be 'http' or 'https'")
 
 for i in range(len(domains)):
     if redirect:
